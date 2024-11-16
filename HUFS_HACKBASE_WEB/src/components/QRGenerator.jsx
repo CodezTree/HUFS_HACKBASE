@@ -5,7 +5,7 @@ import useStore from '../zustand/store'
 export default function QRGenerator() {
   const user = useStore((state) => state.user);
 
-  if (!user)
+  if (!user || (!user.uid && !user.email))
   {
     return <p className="text-black">로그인 후 QR 코드를 생성하세요.</p>
   }
