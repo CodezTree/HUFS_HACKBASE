@@ -30,4 +30,11 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined, // SPA로 작동하도록 설정
+      },
+    },
+  },
 });
