@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import useStore from '../zustand/store';
 
 export default function QRScanner() {
   const setQRData = useStore((state) => state.setQRData);
+  const user = useStore((state) => state.user);
   const [userInfo, setUserInfo] = useState(null);
+  const [feedback, setFeedback] = useState(null);
 
   const handleScan = async (uid) => {
     console.log("scan handling : " + uid);
@@ -22,8 +24,20 @@ export default function QRScanner() {
       if (docSnap.exists()) {
         setQRData(uid); // Zustand 상태에 QR 데이터 저장
         
-        const data = docSnap.data();
-        setUserInfo({ ...data, uid: docSnap.id }); // uid를 문서 ID로 추가
+        const scannedUser = docSnap.data();
+        setUserInfo({ ...scannedUser, uid: docSnap.id }); // uid를 문서 ID로 추가
+
+        // Firestore에서 점수 업데이트
+        const currentUserDoc = doc(db, 'users', user.uid);
+        const scannedUserDoc = doc(db, 'users', uid);
+
+        await Promise.all([
+          updateDoc(currentUserDoc, { score: increment(5), lastConnectionUid: uid}), // 현재 사용자 점수 + 5
+          updateDoc(scannedUserDoc, { score: increment(5), lastConnectionUid: user.uid}), // 스캔된 사용자 점수 + 5
+        ]);
+
+        // 피드백 메시지 설정
+        setFeedback(`성공! ${scannedUser.name || '알 수 없는 사용자'}님과 연결되었습니다.`);
       } else {
         alert('사용자 정보를 찾을 수 없습니다.');
       }
@@ -35,6 +49,7 @@ export default function QRScanner() {
 
   const handleError = (err) => {
     console.error('QR 스캐너 오류:', err);
+    setFeedback('QR 스캔 중 오류가 발생했습니다.');
   };
 
   return (
@@ -43,9 +58,6 @@ export default function QRScanner() {
         <>
           <Scanner
             onScan={(result, error) => {
-              console.log("read! ");
-              console.log(result[0].rawValue)
-
               if (result[0] && result[0].rawValue) {
                 handleScan(result[0].rawValue); // QR 코드에서 UID 추출
               } else if (error) {
@@ -56,16 +68,26 @@ export default function QRScanner() {
           />
           <p className="mt-4 text-lg">QR 코드를 스캔하세요!</p>
         </>
-      ) : (
+        ) : (
         <div>
-          <p className="mt-4 text-lg">스캔 성공! UID: {userInfo.uid}</p>
-          <div className="mt-4 p-4 border rounded-md bg-gray-100 text-black">
-            <p><strong>사용자 이름:</strong> {userInfo.name}</p>
-            <p><strong>이메일:</strong> {userInfo.email}</p>
-            <p><strong>대학교:</strong> {userInfo.university}</p>
-          </div>
+          <p className="mt-4 text-lg text-black">{feedback}</p>
+          {/*<div className="mt-4 p-4 border rounded-md bg-gray-100">*/}
+          {/*  <p><strong>사용자 이름:</strong> {userInfo.name || '정보 없음'}</p>*/}
+          {/*  <p><strong>사용자 UID:</strong> {userInfo.uid}</p>*/}
+          {/*</div>*/}
         </div>
       )}
-    </div>
-  );
+    </div>);
+  // ) : (
+  //   <div>
+  //     <p className="mt-4 text-lg">스캔 성공! UID: {userInfo.uid}</p>
+  //     <div className="mt-4 p-4 border rounded-md bg-gray-100 text-black">
+  //       <p><strong>사용자 이름:</strong> {userInfo.name}</p>
+  //       <p><strong>이메일:</strong> {userInfo.email}</p>
+      //       <p><strong>대학교:</strong> {userInfo.university}</p>
+      //     </div>
+      //   </div>
+      // )}
+  //   </div>
+  // );
 }

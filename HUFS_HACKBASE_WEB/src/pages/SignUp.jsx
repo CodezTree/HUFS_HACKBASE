@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
+import {useNavigate} from "react-router-dom";
 import { auth, db } from '../firebase';
 import useStore from '../zustand/store';
 
@@ -13,6 +14,7 @@ export default function SignUp() {
   const [university, setUniversity] = useState('');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   // loading
   const [loading, setLoading] = useState(false);
