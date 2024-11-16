@@ -3,12 +3,15 @@ import { Scanner } from '@yudiel/react-qr-scanner';
 import { doc, getDoc, updateDoc, increment, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import useStore from '../zustand/store';
+import {useNavigate} from "react-router-dom";
 
 export default function QRScanner() {
   const setQRData = useStore((state) => state.setQRData);
   const user = useStore((state) => state.user);
   const [userInfo, setUserInfo] = useState(null);
   const [feedback, setFeedback] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleScan = async (uid) => {
     console.log("scan handling : " + uid);
@@ -50,7 +53,11 @@ export default function QRScanner() {
         }
 
         // 피드백 메시지 설정
-        setFeedback(`성공! ${scannedUser.name || '알 수 없는 사용자'}님과 연결되었습니다.`);
+        setFeedback(`성공! ${scannedUser.name || '알 수 없는 사용자'}님과 연결되었습니다. \n 5점씩 획득!`);
+
+        setTimeout(()=>{
+          navigate('/')
+        }, 1000)
       } else {
         alert('사용자 정보를 찾을 수 없습니다.');
       }
