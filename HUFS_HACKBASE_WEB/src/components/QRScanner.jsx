@@ -21,6 +21,9 @@ export default function QRScanner() {
       const docRef = doc(db, 'users', uid); // Firestore에서 사용자 정보 조회
       const docSnap = await getDoc(docRef);
 
+      const uniDocRef = doc(db, 'university', user.university)
+      const uniDocSnap = await getDoc(uniDocRef)
+
       if (docSnap.exists()) {
         setQRData(uid); // Zustand 상태에 QR 데이터 저장
         
@@ -35,6 +38,16 @@ export default function QRScanner() {
           updateDoc(currentUserDoc, { score: increment(5), lastConnectionUid: uid}), // 현재 사용자 점수 + 5
           updateDoc(scannedUserDoc, { score: increment(5), lastConnectionUid: user.uid}), // 스캔된 사용자 점수 + 5
         ]);
+
+        if (uniDocSnap.exists()) {
+          const myUnivDoc = doc(db, 'university', user.university);
+          const opposeUnivDoc = doc(db, 'university', scannedUser.university);
+
+          await Promise.all([
+            updateDoc(myUnivDoc, { univScore: increment(5)}),
+            updateDoc(opposeUnivDoc, { univScore: increment(5) })
+          ]);
+        }
 
         // 피드백 메시지 설정
         setFeedback(`성공! ${scannedUser.name || '알 수 없는 사용자'}님과 연결되었습니다.`);
@@ -66,7 +79,7 @@ export default function QRScanner() {
             }}
             style={{ width: '300px' }}
           />
-          <p className="mt-4 text-lg">QR 코드를 스캔하세요!</p>
+          <p className="mt-4 text-lg text-black">QR 코드를 스캔하세요!</p>
         </>
         ) : (
         <div>
@@ -84,7 +97,7 @@ export default function QRScanner() {
   //     <div className="mt-4 p-4 border rounded-md bg-gray-100 text-black">
   //       <p><strong>사용자 이름:</strong> {userInfo.name}</p>
   //       <p><strong>이메일:</strong> {userInfo.email}</p>
-      //       <p><strong>대학교:</strong> {userInfo.university}</p>
+      //       <p><strong>대학교:</strong> {userInfo.university_logo}</p>
       //     </div>
       //   </div>
       // )}

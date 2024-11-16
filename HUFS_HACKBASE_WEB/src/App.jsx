@@ -10,7 +10,12 @@ import Login from './pages/Login.jsx'
 
 // Protected Route: 로그인 필요 페이지
 function ProtectedRoute({ children }) {
-  const [user] = useAuthState(auth); // Firebase 사용자 상태 감지
+  const [user, loading] = useAuthState(auth); // Firebase 사용자 상태 감지
+
+  if (loading) {
+    return <p>로딩 중...</p>;
+  }
+
   return user ? children : <Navigate to="/login" replace />;
 }
 
@@ -30,9 +35,7 @@ export default function App() {
         <Route path="/signup" element={
             <SignUp />} />
         <Route path="/test" element={
-          <ProtectedRoute>
-            <TestPage />
-          </ProtectedRoute>} />
+            <TestPage />} />
       </Routes>
     </Router>
   );

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence} from 'firebase/auth';
-import { auth } from '../firebase';
+import {auth, db} from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import {Eye, EyeOff} from "lucide-react";
 import useStore from '../zustand/store';
+import {doc, getDoc} from "firebase/firestore";
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,13 +24,25 @@ export default function Login() {
 
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-      setUser({
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName: userCredential.user.displayName || '사용자',
-      })
+      // Firestore에서 추가 사용자 정보 가져오기
+      const userDocRef = doc(db, 'users', userCredential.user.uid); // 'users' 컬렉션에서 uid로 문서 참조
+      const userDoc = await getDoc(userDocRef);
 
-      navigate('/'); // 로그인 성공 시 홈으로 이동
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        // Zustand에 사용자 정보 설정
+        setUser({
+          uid: userCredential.user.uid,
+          email: userCredential.user.email,
+          displayName: userCredential.user.displayName || '사용자',
+          university: userData.university || '정보 없음', // university 가져오기
+        });
+
+        navigate('/'); // 로그인 성공 시 홈으로 이동
+      } else {
+        setError('사용자 정보를 찾을 수 없습니다.');
+      }
     } catch (err) {
       setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.');
     }

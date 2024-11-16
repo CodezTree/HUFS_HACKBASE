@@ -40,9 +40,9 @@ export default function QRGenerator() {
           {feedback}
         </div>
       ) : (
-        <div>
+        <div className="flex flex-col items-center">
           <QRCodeSVG value={user.uid || user.email} size={200} />
-          <p className="mt-4 text-lg">이 QR을 상대방에게 보여주세요!</p>
+          <p className="mt-4 text-lg text-black">이 QR을 상대방에게 보여주세요!</p>
         </div>
       )}
     </div>

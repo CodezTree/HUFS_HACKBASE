@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import {auth} from "../firebase.js";
 
 const useStore = create((set) => ({
   user: null, // 현재 사용자 정보
@@ -6,5 +7,9 @@ const useStore = create((set) => ({
   setUser: (user) => set({ user }),
   setQRData: (data) => set({ qrData: data }),
 }));
+
+auth.onAuthStateChanged((user) => {
+  useStore.getState().setUser(user);
+});
 
 export default useStore;

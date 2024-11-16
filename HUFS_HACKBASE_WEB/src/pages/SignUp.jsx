@@ -16,6 +16,19 @@ export default function SignUp() {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
+  const universityList = [
+    "서울대학교",
+    "연세대학교",
+    "고려대학교",
+    "한국외국어대학교",
+    "이화여자대학교",
+    "성균관대학교",
+    "한양대학교",
+    "중앙대학교",
+    "경희대학교",
+    "동국대학교",
+  ];
+
   // loading
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +36,11 @@ export default function SignUp() {
     e.preventDefault();
     setLoading(true);
     setError(null); // 기존 에러 초기화
+
+    if (!university || university === "") {
+      setError("대학교를 선택해주세요.");
+      return;
+    }
 
     // password email 검증
     if (password.length < 6) {
@@ -46,6 +64,7 @@ export default function SignUp() {
         name,
         university,
         email,
+        score: 0, // 초기 점수 설정
         createdAt: new Date(),
       });
 
@@ -72,49 +91,67 @@ export default function SignUp() {
         onSubmit={handleSignUp}
         className="bg-white p-6 rounded-lg shadow-md w-80 space-y-4"
       >
-        <h2 className="text-2xl font-bold text-center">회원가입</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800">회원가입</h2>
         {error && <p className="text-red-500 text-sm">{error}</p>}
         {success && <p className="text-green-500 text-sm">회원가입 성공! (자동으로 로그인 이동합니다)</p>}
-        <input
-          type="text"
-          placeholder="이름"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring"
-          required
-        />
-        <input
-          type="text"
-          placeholder="대학교"
-          value={university}
-          onChange={(e) => setUniversity(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring"
-          required
-        />
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring"
-          required
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-        >
-          {loading ? '처리 중...' : '가입하기' }
-        </button>
+        <div>
+          <label className="block text-gray-700">이름</label>
+          <input
+            type="text"
+            placeholder="이름"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="text-black w-full px-4 py-2 border rounded-md focus:outline-none focus:ring bg-white"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700">대학교</label>
+          <select
+            value={university}
+            onChange={(e) => setUniversity(e.target.value)}
+            required
+            className="text-black mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
+          >
+            <option value="">대학교를 선택하세요</option>
+            {universityList.map((uni, index) => (
+              <option key={index} value={uni}>
+                {uni}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-gray-700">이메일</label>
+          <input
+            type="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="text-black w-full px-4 py-2 border rounded-md focus:outline-none focus:ring bg-white"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700">비밀번호</label>
+          <input
+            type="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="text-black w-full px-4 py-2 border rounded-md focus:outline-none focus:ring bg-white"
+            required
+          />
+        </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+          >
+            {loading ? '처리 중...' : '가입하기'}
+          </button>
       </form>
     </div>
-  );
+);
 }
